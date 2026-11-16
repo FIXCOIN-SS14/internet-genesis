@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Internet Genesis</title>
+<style>
+:root{color-scheme:light;--bg:#dfe6f1;--panel:#f4f7fc;--card:#fff;--ink:#16233b;--dim:#5d6b85;--line:#b4c1d6;--ok:#0a8f7a;--glow:#0a8f7a55;--acc:#2f6fe4;--warn:#c07a00;--bad:#c9303f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0d1424;--panel:#141d30;--card:#172136;--ink:#dce6f6;--dim:#7f8da8;--line:#27344f;--ok:#25e6c3;--glow:#25e6c388;--acc:#5aa9ff;--warn:#f5a524;--bad:#ff5d6c}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0d1424;--panel:#141d30;--card:#172136;--ink:#dce6f6;--dim:#7f8da8;--line:#27344f;--ok:#25e6c3;--glow:#25e6c388;--acc:#5aa9ff;--warn:#f5a524;--bad:#ff5d6c}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{position:relative;overflow:hidden;background:var(--bg);color:var(--ink);font:13px/1.4 system-ui,"Segoe UI",sans-serif}
+main{position:absolute;inset:0}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+header{position:absolute;top:10px;left:10px;z-index:3;display:flex;flex-direction:column;gap:8px}
+.pill{display:flex;align-items:center;gap:10px;min-width:200px;padding:9px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 2px 14px #0003}
+.pill i{font-style:normal;font-size:18px;color:var(--ok);width:22px;text-align:center}
+.pill b{font-size:19px;font-weight:600}
+.pill small{margin-left:auto;color:var(--dim)}
+.rail{position:absolute;top:10px;right:10px;z-index:3;display:flex;flex-direction:column;gap:8px}
+footer{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:8px;max-width:96%}
+#sel{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+#sel[hidden]{display:none}
+#pal{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 14px #0003}
+button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:6px 11px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--ok);box-shadow:0 0 10px var(--glow)}
+button:disabled{opacity:.4;cursor:default}
+button.on{border-color:var(--warn)}
+.ib{width:44px;height:44px;padding:0;font-size:20px;background:var(--panel);border-radius:12px}
+.mb i{font-style:normal;color:var(--ok);margin-right:6px}
+.mb small{color:var(--dim)}
+#msg{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:2;max-width:min(560px,60%);text-align:center;color:var(--dim);pointer-events:none}
+#wins{position:absolute;inset:0;pointer-events:none;z-index:4}
+.win{position:absolute;pointer-events:auto;width:min(92%,460px);max-height:84%;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 32px #0006}
+.wt{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);cursor:move;touch-action:none;font-weight:600}
+.wb{padding:8px 14px 14px;overflow:auto}
+.wb h4{margin:14px 0 6px;font-size:12px;font-weight:600;color:var(--dim)}
+.wb p{margin:6px 0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cell{display:flex;flex-direction:column;gap:4px}
+.cell.dim{border:1px dashed var(--line);border-radius:9px;align-items:center;justify-content:center;min-height:56px}
+.cc{min-height:48px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.dim{color:var(--dim)}
+.pk{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9;width:min(94%,720px);max-height:86%;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 48px #0008}
+.pk[hidden]{display:none}
+.pt{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);font-size:15px}
+.pbd{display:flex;gap:12px;padding:12px;overflow:auto;flex-wrap:wrap}
+.pl{flex:2 1 320px}
+.pl input{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:7px 10px}
+#ptabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+#pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}
+.nb{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px}
+.nb i{font-style:normal;font-size:22px;color:var(--ok)}
+.nb span{font-size:12px;text-align:center}
+.nb.on{border-color:var(--warn)}
+#pd{flex:1 1 200px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:10px}
+#pd h3{margin:0 0 6px;font-size:16px}
+#pd i{font-style:normal;color:var(--ok)}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97)}}
+@keyframes fade{from{opacity:0}}
+@keyframes blip{0%,100%{transform:translateY(0);opacity:.9}50%{transform:translateY(-16px);opacity:.4}}
+.win{animation:pop .2s ease-out}.pk{animation:fade .2s}
+button{transition:border-color .15s,box-shadow .15s,transform .1s}
+button:active:not(:disabled){transform:scale(.96)}
+.mk{border:2px solid;border-radius:10px;overflow:hidden;color:#16233b;background:#fff;margin:8px 0;animation:pop .3s ease-out}
+.mk .tb{display:flex;gap:8px;align-items:center;padding:6px 10px;color:#fff;font-size:12px}
+.mk .hd{padding:14px 12px}.mk .hd b{font-size:20px}.mk .hd small{display:block;color:#445}
+.mk .ln{display:flex;gap:6px;padding:10px 12px}.mk .ln u{flex:1;height:34px;border-radius:6px;background:#e3e8f2}
+.mk .sc{position:relative;height:130px;background:linear-gradient(#0f1830,#25304f)}
+.mk .sc s{position:absolute;bottom:14px;width:12px;height:12px;border-radius:50%;animation:blip 1.6s ease-in-out infinite}
+.mk .pr{display:grid;grid-template-columns:64px 1fr;min-height:120px}
+.mk .pr .sd{background:#e3e8f2}.mk .pr .mn{padding:10px}.mk .pr i{display:block;height:10px;margin:8px 0;border-radius:5px;background:#dfe5f1}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@keyframes slideR{from{opacity:0;transform:translateX(-20px)}}
+@keyframes slideL{from{opacity:0;transform:translateX(20px)}}
+@keyframes rise{from{opacity:0;transform:translate(-50%,16px)}}
+@keyframes rise2{from{opacity:0;transform:translateY(10px)}}
+@keyframes msg{from{opacity:0;transform:translate(-50%,-8px)}}
+@keyframes bump{50%{transform:scale(1.18);color:var(--ok)}}
+@keyframes out{to{opacity:0;transform:translateY(8px) scale(.97)}}
+.pill{animation:slideR .5s backwards}.pill:nth-child(2){animation-delay:.07s}.pill:nth-child(3){animation-delay:.14s}.pill:nth-child(4){animation-delay:.21s}
+.pill b{display:inline-block}.pill b.bump{animation:bump .3s}
+.rail .ib{animation:slideL .4s backwards}.rail .ib:nth-child(2){animation-delay:.05s}.rail .ib:nth-child(3){animation-delay:.1s}.rail .ib:nth-child(4){animation-delay:.15s}.rail .ib:nth-child(5){animation-delay:.2s}.rail .ib:nth-child(6){animation-delay:.25s}
+footer{animation:rise .5s .2s backwards}
+#sel{animation:rise2 .25s}
+#msg.flash{animation:msg .4s}
+.win.out{animation:out .16s forwards;pointer-events:none}
+button{transition:border-color .15s,box-shadow .15s,transform .12s,background .15s,opacity .15s}
+button:hover:not(:disabled){transform:translateY(-1px)}
+button:active:not(:disabled){transform:scale(.95)}
+#dpw{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:6px 10px}
+</style>
+</head>
+<body>
+<main><canvas id="map"></canvas><div id="wins"></div></main>
+<div id="msg"></div>
+<header><div class="pill"><i>☻</i><b id="users">0</b><small id="urate"></small></div><div class="pill"><i>⚛</i><b id="rp">0</b><small id="rrate"></small></div><div class="pill"><i>¤</i><b id="cr">0</b><small id="crr"></small></div><div class="pill"><i>✦</i><b id="sp">0</b><small>искры</small></div></header>
+<div class="rail"><button class="ib" id="bMenu" title="Меню: достижения, магазин, сохранения" aria-label="Меню">☰</button><button class="ib" id="bTech" title="Исследования" aria-label="Исследования">⚛</button><button class="ib" id="bHome" title="К Интернету" aria-label="К Интернету">⌂</button><button class="ib" id="bZi" title="Приблизить" aria-label="Приблизить">＋</button><button class="ib" id="bZo" title="Отдалить" aria-label="Отдалить">－</button><button class="ib" id="bReset" title="Сброс прогресса" aria-label="Сброс прогресса">↺</button></div>
+<footer><div id="sel" hidden><span id="selinfo"></span><button id="bLink"></button><button id="bUp"></button><button id="bOpen">Окно сервера</button><button id="bDel">Удалить</button></div><div id="pal"></div></footer>
+<script>
+const $=s=>document.querySelector(s);
+/* ===== БАЛАНС: все числа игры здесь. k = сколько пользователей нужно, чтобы открылось ===== */
+const B={
+ mods:{internet:{n:'Интернет',r:350,u:0,k:0,lim:4},cable:{n:'Кабель',r:450,u:0,k:0,$:3},router:{n:'Роутер',r:350,u:0,k:20,$:30,cov:280,cap:3},hub:{n:'Маршрутизатор',r:380,u:0,k:60,$:90,lim:8,cap:2,t:'net2'},switch:{n:'Коммутатор',r:650,u:2,k:150,$:80,t:'net2'},server:{n:'Сервер',r:300,u:0,k:0,$:30,lim:3},cdn:{n:'CDN-узел',r:400,u:0,b:.25,k:500,$:250,t:'cdn'},scanner:{n:'Вирус-сканер',r:350,u:0,b:.3,k:250,$:150,t:'sec'},verifier:{n:'Верификатор',r:350,u:0,b:.3,k:350,$:200,t:'sec'},enhancer:{n:'Улучшитель',r:350,u:0,b:.4,k:900,$:400,t:'sec'},auto:{n:'Авто-сборщик',r:350,u:2,k:120,$:60},cpucell:{n:'Проц. ячейка',r:350,u:0,rp:.15,k:200,$:100},research:{n:'Исслед. узел',r:350,u:0,rp:.6,k:600,$:300,t:'lab'},miner:{n:'GPU-майнер',r:350,u:4,k:1200,$:500,t:'gpu1'},sat:{n:'Спутник',r:1500,u:10,k:800,$:600,t:'orbit',cov:900,cap:6}},
+ comps:{cpu:{n:'Процессор',k:0,$:15,main:['core','core2','core3'],parts:['core','core2','core3','thread','cooler']},gpu:{n:'Видеокарта',k:300,$:120,main:['gcore','gcore2','gcore3'],parts:['gcore','gcore2','gcore3','cooler']},ram:{n:'Память',k:0,$:12,main:['chip','chip2','chip3'],parts:['chip','chip2','chip3','cooler']},cool:{n:'Охлаждение',k:0,$:8,main:['fan'],parts:['fan','pipe','pump']},hdd:{n:'HDD',k:0,$:8,simple:1,cap:40,spd:1},ssd:{n:'SSD',k:0,$:60,t:'ssd',simple:1,cap:100,spd:1.3},nvme:{n:'NVMe',k:0,$:200,t:'nvme',simple:1,cap:300,spd:1.7}},
+ parts:{core:{n:'Ядро',p:10,h:6,c:0,k:0},core2:{n:'Ядро II',p:22,h:11,c:0,k:0,t:'cpu1'},core3:{n:'Ядро III',p:48,h:20,c:0,k:0,t:'cpu2'},thread:{n:'Поток',p:4,h:2,c:0,k:0,t:'smt'},gcore:{n:'Ядро GPU',p:14,h:9,c:0,k:0},gcore2:{n:'Ядро GPU II',p:30,h:16,c:0,k:0,t:'gpu1'},gcore3:{n:'Ядро GPU III',p:70,h:30,c:0,k:0,t:'gpu2'},chip:{n:'Чип памяти',p:6,h:2,c:0,k:0},chip2:{n:'Чип DDR2',p:14,h:3,c:0,k:0,t:'ram1'},chip3:{n:'Чип DDR4',p:30,h:5,c:0,k:0,t:'ram2'},cooler:{n:'Кулер',p:0,h:0,c:8,k:0},fan:{n:'Вентилятор',p:0,h:0,c:10,k:0},pipe:{n:'Трубка',p:0,h:0,c:16,k:0,t:'liq'},pump:{n:'Помпа',p:0,h:0,c:36,k:0,t:'nano'}},
+ cont:{site:{n:'Сайт',l:5,u:1,k:0,kinds:[{n:'Блог',l:1,u:1},{n:'Магазин',l:1.6,u:1.8,t:'web2'},{n:'Соцсеть',l:2.6,u:3.6,t:'social'}]},prog:{n:'Программа',l:10,u:3,k:150,kinds:[{n:'Утилита',l:1,u:1},{n:'Мессенджер',l:1.8,u:2.2,t:'p2p'},{n:'Браузер',l:3,u:4.4,t:'web2'}]},game:{n:'Игра',l:25,u:8,k:400,gpu:1,kinds:[{n:'Казуальная',l:1,u:1},{n:'Онлайн-шутер',l:2,u:2.6,t:'net3d'},{n:'MMO',l:3.4,u:5,t:'p2p'}]}},
+ tech:{cpu1:{n:'Техпроцесс 90 нм',c:30,d:'Ядро II'},net2:{n:'Маршрутизация',c:40,d:'Маршрутизатор, Коммутатор'},cdn:{n:'Сети доставки',c:90,r:'net2',d:'CDN-узел'},orbit:{n:'Орбитальная связь',c:250,r:'net2',d:'Спутник'},sec:{n:'Безопасность',c:100,d:'Сканер, Верификатор, Улучшитель'},lab:{n:'Научный центр',c:60,d:'Исследовательский узел'},ssd:{n:'Флеш-память',c:120,d:'SSD'},nvme:{n:'Шина NVMe',c:300,r:'ssd',d:'NVMe'},smt:{n:'Многопоточность',c:40,r:'cpu1',d:'Потоки в процессоре'},cpu2:{n:'Техпроцесс 28 нм',c:150,r:'cpu1',d:'Ядро III'},gpu1:{n:'Шейдерные ядра',c:60,d:'Ядро GPU II'},gpu2:{n:'Унифицированные шейдеры',c:220,r:'gpu1',d:'Ядро GPU III'},ram1:{n:'DDR2',c:30,d:'Чип DDR2'},ram2:{n:'DDR4',c:160,r:'ram1',d:'Чип DDR4'},liq:{n:'Тепловые трубки',c:80,d:'Трубка'},nano:{n:'Жидкостное охлаждение',c:200,r:'liq',d:'Помпа'},web2:{n:'Динамические сайты',c:50,d:'Сайт: Магазин. Программа: Браузер'},social:{n:'Соцсети',c:200,r:'web2',d:'Сайт: Соцсеть'},p2p:{n:'P2P-сети',c:120,d:'Программа: Мессенджер. Игра: MMO'},net3d:{n:'Сетевая 3D-графика',c:180,r:'gpu1',d:'Игра: Онлайн-шутер'}},
+ SLOTS:6,CELLS:12,COLS:4,TPC:2,HEAT:6};
+/* ===== ДАННЫЕ И СОХРАНЕНИЕ ===== */
+const fresh=()=>({users:0,rp:0,cr:100,sp:0,ach:{},boost:0,tech:{},next:1,mods:{0:{id:0,t:'internet',x:0,y:0,l:[]}}});
+let S;try{S=JSON.parse(localStorage.getItem('ig3'))}catch(e){}
+if(!S||!S.mods||!S.mods[0])S=fresh();
+function fix(){for(const m of Object.values(S.mods))if(m.srv&&!Array.isArray(m.srv.cont))m.srv.cont=[];S.cr??=0;S.sp??=0;S.ach??={};S.boost??=0;S.tech??={};S.rp??=0}fix();
+const save=()=>{try{localStorage.setItem('ig3',JSON.stringify(S))}catch(e){}};
+const f=n=>n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':''+~~n;
+/* ===== ПРАВИЛА: детали -> комплектующее -> сервер -> пользователи ===== */
+function compCheck(c){const I=B.comps[c.t];if(I.simple)return{ok:true,why:'',p:0,h:0,k:0};let p=0,h=0,k=0,n={},why='';
+ for(const x of c.cells){if(!x)continue;const q=B.parts[x];p+=q.p;h+=q.h;k+=q.c;n[x]=(n[x]||0)+1}
+ const cores=(n.core||0)+(n.core2||0)+(n.core3||0);if(!I.main.some(x=>n[x]))why='нет детали: '+B.parts[I.main[0]].n;
+ else if((n.thread||0)>cores*B.TPC)why='потоков больше '+B.TPC+' на ядро';
+ else if(h>k)why='перегрев: тепло '+h+' больше охлаждения '+k;
+ return{ok:!why,why,p,h,k}}
+const LV=[0,1,1.8,2.5],itK=it=>B.cont[it.t].kinds[it.k],itL=it=>B.cont[it.t].l*itK(it).l*it.lv,itU=it=>B.cont[it.t].u*itK(it).u*LV[it.lv],srvLoad=s=>s.cont.reduce((a,it)=>a+itL(it),0);
+function srvCheck(s){const r={ok:false,why:'',p:0,load:srvLoad(s),gpu:false};let n={},cool=0,cnt=0,sto=0,spd=1;
+ for(const c of s.slots){if(!c)continue;if(!B.comps[c.t].simple)cnt++;const q=compCheck(c);
+  if(!q.ok){r.why=B.comps[c.t].n+' не работает ('+q.why+')';return r}
+  n[c.t]=(n[c.t]||0)+1;const CI=B.comps[c.t];if(CI.simple){sto+=CI.cap;spd=Math.max(spd,CI.spd)}if(c.t=='cool')cool+=q.k;else r.p+=q.p}
+ for(const t of['cpu','ram','cool'])if(!n[t]){r.why='нет комплектующего: '+B.comps[t].n;return r}
+ const need=(cnt-n.cool)*B.HEAT;
+ if(cool<need){r.why='не хватает охлаждения: '+cool+' из '+need;return r}
+ if(!sto){r.why='нет комплектующего: диск (HDD, SSD или NVMe)';return r}
+ if(srvSto(s)>sto){r.why='не хватает места на дисках: '+srvSto(s)+' из '+sto;return r}
+ if(r.load>r.p){r.why='перегрузка: контент '+r.load+' больше мощности '+r.p;return r}
+ r.gpu=!!n.gpu;r.sto=sto;r.spd=spd;r.ok=true;return r}
+function cannot(s,q,t){const v=B.cont[t];
+ return S.users<v.k?'откроется при '+v.k:!q.ok?'сервер не работает':v.gpu&&!q.gpu?'нужна видеокарта':srvLoad(s)+v.l*v.kinds[0].l>q.p?'не хватает мощности':srvSto(s)+STO[t]>(q.sto||0)?'не хватает места на дисках':''}
+const avail=x=>S.users>=x.k&&(!x.t||S.tech[x.t]);
+const sig=()=>[B.mods,B.comps,B.parts,B.cont].reduce((a,t)=>a+Object.values(t).filter(avail).length,0)+Object.keys(S.tech).length;
+/* ===== СИМУЛЯЦИЯ: что в сети и сколько пользователей в секунду ===== */
+let online=new Set([0]),rate=.5,rpRate=0,crRate=0,shr={0:1};
+const lvl=m=>m.lv||1,mu=m=>1+.5*(lvl(m)-1),mr=m=>B.mods[m.t].r*(1+.25*(lvl(m)-1)),upCost=m=>Math.round((B.mods[m.t].$||100)*1.8**lvl(m)),STO={site:5,prog:10,game:30},srvSto=s=>s.cont.reduce((a,it)=>a+STO[it.t]*it.lv,0);
+const cov=m=>(B.mods[m.t].cov||0)*(1+.25*(lvl(m)-1)),nbrs=m=>{const a=new Set(m.l.filter(o=>S.mods[o])),c=cov(m);if(c)for(const o of Object.values(S.mods))if(o.id!=m.id&&Math.hypot(o.x-m.x,o.y-m.y)<=c)a.add(o.id);return[...a]};
+function recalc(){online=new Set([0]);shr={0:1};const q=[0];
+ while(q.length){const id=q.shift(),m=S.mods[id],d=B.mods[m.t],nb=nbrs(m),pass=d.cap?Math.min(1,d.cap/Math.max(1,nb.length)):1; /* маршрутизатор делит скорость между каналами */
+  for(const o of nb)if(!online.has(o)){online.add(o);shr[o]=shr[id]*pass;q.push(o)}}
+ rate=0;rpRate=0;
+ for(const id of online){const m=S.mods[id],d=B.mods[m.t],sh=shr[id];rate+=(d.u||0)*mu(m)*sh;rpRate+=(d.rp||0)*mu(m)*sh;
+  if(m.srv){const q=srvCheck(m.srv);if(q.ok){const bst=1+m.l.filter(o=>online.has(o)).reduce((a,o)=>a+(B.mods[S.mods[o].t].b||0)*mu(S.mods[o]),0);for(const it of m.srv.cont)rate+=itU(it)*bst*q.spd*sh*mu(m);rpRate+=(q.p-q.load)*.05*sh}}}
+ if(Date.now()<S.boost)rate*=2;
+ crRate=rate*.3}
+/* ===== УРОВЕНЬ 1: КАРТА (бесконечная, тащи пустое место) ===== */
+const cv=$('#map'),cx=cv.getContext('2d'),rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let Z=1,Zt=1,panT=null,hov=-1,W=1,H=1,pan={x:0,y:0},sel=-1,linking=false,pr=null;
+function resize(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=r.height;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)}
+new ResizeObserver(resize).observe(cv);
+const ctr=m=>({x:W/2+pan.x+m.x,y:H/2+pan.y+m.y});
+cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);const r=cv.getBoundingClientRect();const px=(e.clientX-r.left-W/2)/Z+W/2,py=(e.clientY-r.top-H/2)/Z+H/2,po=portAt(px,py);panT=null;pr={id:po>=0?po:hit(px,py),port:po>=0,d:0,x:e.clientX,y:e.clientY}};
+cv.onpointermove=e=>{const r0=cv.getBoundingClientRect();hov=hit((e.clientX-r0.left-W/2)/Z+W/2,(e.clientY-r0.top-H/2)/Z+H/2);cv.style.cursor=hov>=0?'pointer':'grab';if(!pr)return;const dx=e.clientX-pr.x,dy=e.clientY-pr.y;pr.x=e.clientX;pr.y=e.clientY;pr.d+=Math.hypot(dx,dy);
+ if(pr.d>5){if(pr.id<0){pan.x+=dx/Z;pan.y+=dy/Z}else if(pr.id>=0&&!pr.port){S.mods[pr.id].x+=dx/Z;S.mods[pr.id].y+=dy/Z}}};
+cv.onpointerup=()=>{if(pr&&pr.d<=5)click(pr.id,pr.port);pr=null};
+function click(id,port){
+ if(id<0){sel=-1;linking=false}
+ else if(port){if(linking&&sel>=0&&id!=sel){link(sel,id);linking=false}else{sel=id;linking=true}}
+ else if(linking&&sel>=0&&id!=sel){link(sel,id);linking=false}
+ else{sel=id;linking=false;if(S.mods[id].srv)openWin('s'+id);}
+ ui()}
+function link(a,b){const ma=S.mods[a],mb=S.mods[b];
+ if(ma.l.includes(b)){ma.l=ma.l.filter(x=>x!=b);mb.l=mb.l.filter(x=>x!=a)}
+ else{if(ma.l.length>=(B.mods[ma.t].lim||2)||mb.l.length>=(B.mods[mb.t].lim||2))return say('Нет свободных портов: поставь Маршрутизатор.');const d=Math.hypot(ma.x-mb.x,ma.y-mb.y),r=Math.max(mr(ma),mr(mb));
+  if(d>r)return say('Слишком далеко: '+~~d+' при дальности '+r+'. Поставь кабель посередине.');
+  ma.l.push(b);mb.l.push(a)}
+ changed()}
+/* ----- карточки узлов, порты и светящиеся связи ----- */
+const CW=190,GL={internet:'◎',cable:'═',router:'⌁',hub:'⌘',switch:'⇄',server:'≣',cdn:'✶',sat:'✹',scanner:'⛨',verifier:'✔',enhancer:'⬆',auto:'⟳',cpucell:'▣',research:'⚛',miner:'⛏'};
+function rowsOf(m){const d=B.mods[m.t],on=online.has(m.id),r=[];
+ if(m.t=='internet')return{r:[['Роль','точка входа'],['Порты',m.l.length+'/'+d.lim]]};
+ if(m.srv){const q=srvCheck(m.srv);return{r:[['Мощность',q.ok?q.p:'нет'],['Контент',m.srv.cont.length],['Состояние',q.ok?'работает':'сбой']],bar:q.ok&&q.p?q.load/q.p:0,bad:!q.ok}}
+ r.push(['Связь',on?'в сети':'нет связи']);
+ if(d.u)r.push(['Польз.','+'+d.u+'/с']);if(d.b)r.push(['Бонус серверам','+'+d.b*100+'%']);if(d.rp)r.push(['ОИ','+'+d.rp+'/с']);if(d.cov)r.push(['Зона раздачи',~~cov(m)]);if(d.cap)r.push(['Скорость на канал',Math.round(Math.min(1,d.cap/Math.max(1,nbrs(m).length))*100)+'%']);r.push(['Порты',m.l.length+'/'+(d.lim||2)]);
+ return{r}}
+const cardH=m=>{const o=rowsOf(m);return 34+o.r.length*19+(o.bar!==undefined?12:0)};
+function hit(px,py){for(const id of Object.keys(S.mods).reverse()){const m=S.mods[id],c=ctr(m);if(Math.abs(px-c.x)<CW/2&&Math.abs(py-c.y)<cardH(m)/2)return+id}return-1}
+let fl=[];
+function portAt(px,py){for(const id of Object.keys(S.mods).reverse()){const c=ctr(S.mods[id]);for(const sx of[-1,1])if(Math.hypot(px-c.x-sx*CW/2,py-c.y)<11/Math.min(1,Z))return+id}return-1}
+function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()}
+function draw(){const cs=getComputedStyle(document.documentElement),g=n=>cs.getPropertyValue(n).trim(),tt=performance.now(),ok=g('--ok');
+ cx.fillStyle=g('--bg');cx.fillRect(0,0,W,H);
+ cx.fillStyle=g('--line');cx.globalAlpha=.7;
+ const T=48*Z;for(let x=((W/2+pan.x*Z)%T+T)%T;x<W;x+=T)for(let y=((H/2+pan.y*Z)%T+T)%T;y<H;y+=T)cx.fillRect(x,y,2,2);
+ cx.globalAlpha=1;
+ cx.save();cx.translate(W/2,H/2);cx.scale(Z,Z);cx.translate(-W/2,-H/2);
+ if(S.mods[sel]){const c=ctr(S.mods[sel]);cx.beginPath();cx.arc(c.x,c.y,mr(S.mods[sel]),0,7);cx.strokeStyle=g('--dim');cx.setLineDash([6,8]);cx.globalAlpha=.5;cx.lineWidth=1;cx.stroke();cx.setLineDash([]);cx.globalAlpha=1}
+ for(const m of Object.values(S.mods)){const rad=cov(m);if(rad&&online.has(m.id)){const c=ctr(m);cx.beginPath();cx.arc(c.x,c.y,rad,0,7);cx.fillStyle=ok;cx.globalAlpha=.05+.03*Math.sin(tt/600);cx.fill();cx.setLineDash([5,9]);cx.lineWidth=1;cx.strokeStyle=ok;cx.globalAlpha=.35;cx.stroke();
+  cx.lineWidth=1.5;cx.globalAlpha=.5;for(const o of nbrs(m))if(!m.l.includes(o)&&online.has(o)){const d=ctr(S.mods[o]);cx.beginPath();cx.moveTo(c.x,c.y);cx.lineTo(d.x,d.y);cx.stroke()}cx.setLineDash([]);cx.globalAlpha=1}}
+ for(const m of Object.values(S.mods))for(const o of m.l)if(o>m.id){
+  const n=S.mods[o],A=ctr(m),Z=ctr(n),s=A.x<=Z.x?1:-1,x0=A.x+s*CW/2,x3=Z.x-s*CW/2,dx=Math.max(40,Math.abs(x3-x0)/2),on=online.has(m.id)&&online.has(o);
+  cx.beginPath();cx.moveTo(x0,A.y);cx.bezierCurveTo(x0+s*dx,A.y,x3-s*dx,Z.y,x3,Z.y);
+  cx.lineWidth=2.5;cx.strokeStyle=on?ok:g('--dim');cx.shadowColor=on?g('--glow'):'transparent';cx.shadowBlur=on?12:0;cx.stroke();cx.shadowBlur=0;
+  if(on&&!rm){const p=(tt/2200+m.id*.37)%1,q=1-p,X=q*q*q*x0+3*q*q*p*(x0+s*dx)+3*q*p*p*(x3-s*dx)+p*p*p*x3,Y=q*q*q*A.y+3*q*q*p*A.y+3*q*p*p*Z.y+p*p*p*Z.y;cx.fillStyle='#fff';cx.beginPath();cx.arc(X,Y,3,0,7);cx.fill()}}
+ cx.textBaseline='middle';
+ for(const m of Object.values(S.mods)){const c=ctr(m),o=rowsOf(m),h=cardH(m),x=c.x-CW/2,y=c.y-h/2,on=online.has(m.id),isel=m.id==sel,lit=on?ok:g('--dim');
+  const edge=o.bad?g('--bad'):isel?(linking?g('--acc'):g('--warn')):g('--line');
+  const age=m.born>tt?1:Math.min(1,(tt-(m.born||0))/260);cx.save();cx.translate(c.x,c.y);cx.scale(.85+.15*age,.85+.15*age);cx.translate(-c.x,-c.y);cx.globalAlpha=age;
+  rr(x,y,CW,h,10);cx.fillStyle=g('--card');cx.shadowColor=m.id==hov?g('--glow'):'#0006';cx.shadowBlur=m.id==hov?22:12;cx.fill();cx.shadowBlur=0;
+  cx.lineWidth=isel||o.bad?2:1;cx.strokeStyle=edge;cx.stroke();
+  rr(x+8,y+7,20,20,6);cx.fillStyle=lit;cx.globalAlpha=.18;cx.fill();cx.globalAlpha=1;
+  cx.textAlign='center';cx.fillStyle=lit;cx.font='13px system-ui,sans-serif';cx.fillText(GL[m.t]||'◆',x+18,y+17.5);
+  cx.textAlign='left';cx.fillStyle=g('--ink');cx.font='600 13px system-ui,sans-serif';cx.fillText(B.mods[m.t].n+(m.srv?' #'+m.id:'')+(lvl(m)>1?' ·'+lvl(m):''),x+36,y+17.5);
+  cx.strokeStyle=g('--line');cx.lineWidth=1;cx.beginPath();cx.moveTo(x+8,y+32);cx.lineTo(x+CW-8,y+32);cx.stroke();
+  cx.font='12px system-ui,sans-serif';
+  o.r.forEach((t,i)=>{const ry=y+44+i*19,v=''+t[1];cx.textAlign='left';cx.fillStyle=g('--dim');cx.fillText(t[0],x+12,ry);cx.textAlign='right';cx.fillStyle=(v=='сбой'||v=='нет связи'||v=='нет')?g('--bad'):g('--ink');cx.fillText(v,x+CW-12,ry)});
+  if(o.bar!==undefined){const by=y+h-12;rr(x+12,by,CW-24,5,2.5);cx.fillStyle=g('--line');cx.fill();rr(x+12,by,Math.max(5,(CW-24)*Math.min(1,o.bar)),5,2.5);cx.fillStyle=o.bar>.9?g('--warn'):ok;cx.fill()}
+  for(const px of[x,x+CW]){cx.beginPath();cx.arc(px,c.y,isel&&linking?6+Math.sin(tt/150)*1.5:5,0,7);cx.fillStyle=g('--card');cx.fill();cx.lineWidth=2;cx.strokeStyle=m.l.length?lit:g('--dim');cx.stroke()}cx.restore()}
+ fl=fl.filter(f=>tt-f.t<900);for(const f of fl){const a=(tt-f.t)/900;cx.globalAlpha=1-a;cx.fillStyle=ok;cx.font='600 15px system-ui,sans-serif';cx.textAlign='center';cx.fillText(f.s,f.x,f.y-a*50)}cx.globalAlpha=1;cx.restore()}
+/* ===== УРОВНИ 2 И 3: ОКНА (сервер -> комплектующее) ===== */
+const wins={};let z=5;
+function openWin(k){
+ if(wins[k]){wins[k].el.style.zIndex=++z;return}
+ const el=document.createElement('div'),n=Object.keys(wins).length,id=k.slice(1).split('_')[0];
+ el.className='win';el.style.zIndex=++z;el.style.left=(16+n*28)+'px';el.style.top=(44+n*28)+'px';
+ el.innerHTML='<div class="wt"><b>'+(k=='t'?'Исследования':k=='m'?'Меню':k[0]=='k'?'Контент, сервер #'+id:k[0]=='s'?'Сервер #'+id:'Комплектующее, сервер #'+id)+'</b><button data-a="close" data-v="'+k+'" aria-label="Закрыть">×</button></div><div class="wb"></div>';
+ $('#wins').appendChild(el);wins[k]={el,body:el.lastChild,html:''};
+ const t=el.firstChild;let d=null;
+ t.onpointerdown=e=>{if(e.target.closest('button'))return;t.setPointerCapture(e.pointerId);el.style.zIndex=++z;d=[e.clientX,e.clientY]};
+ t.onpointermove=e=>{if(!d)return;el.style.left=el.offsetLeft+e.clientX-d[0]+'px';el.style.top=el.offsetTop+e.clientY-d[1]+'px';d=[e.clientX,e.clientY]};
+ t.onpointerup=()=>d=null;
+ renderWins()}
+function closeWin(k){const w=wins[k];if(w){delete wins[k];w.el.classList.add('out');setTimeout(()=>w.el.remove(),160)}}
+function renderWins(){for(const k of Object.keys(wins)){const h=winHTML(k);if(h===null){closeWin(k);continue}const w=wins[k];if(h!==w.html){w.html=h;w.body.innerHTML=h}}}
+function winHTML(k){
+ if(k=='t')return techHTML();if(k=='m')return menuHTML();
+ const[id,sl]=k.slice(1).split('_').map(Number),m=S.mods[id];
+ if(!m)return null;
+ if(k[0]=='k')return contentHTML(m.srv.cont[sl]);
+ if(k[0]=='s'){
+  const q=srvCheck(m.srv),free=m.srv.slots.includes(null);
+  const slots=m.srv.slots.map((c,i)=>c?'<div class="cell"><button data-a="'+(B.comps[c.t].simple?'noop':'openC')+'" data-v="'+id+'_'+i+'">'+B.comps[c.t].n+'<br>'+(compCheck(c).ok?'<span class="ok">'+(B.comps[c.t].simple?B.comps[c.t].cap+' ГБ':'работает')+'</span>':'<span class="bad">не работает</span>')+'</button><button data-a="rmC" data-v="'+id+'_'+i+'">убрать</button></div>':'<div class="cell dim">пусто</div>').join('');
+  const inst=Object.entries(B.comps).map(([t,v])=>'<button data-a="addC" data-v="'+id+'_'+t+'"'+(!avail(v)||S.cr<v.$||!free?' disabled':'')+'>+ '+v.n+' '+v.$+' ¤'+(!avail(v)?' (нужно: '+(v.t&&!S.tech[v.t]?B.tech[v.t].n:v.k)+')':'')+'</button>').join(' ');
+  const add=Object.entries(B.cont).map(([t,v])=>{const w=cannot(m.srv,q,t);return '<button data-a="addK" data-v="'+id+'_'+t+'"'+(w?' disabled':'')+'>+ '+v.n+(w?' ('+w+')':'')+'</button>'}).join(' ');
+  const items=m.srv.cont.map((it,i)=>{const K='data-v="'+id+'_'+i;return '<div style="margin:6px 0"><b>'+(it.nm||B.cont[it.t].n)+'</b> ('+B.cont[it.t].n.toLowerCase()+') «'+itK(it).n+'», ур. '+it.lv+' <small class="dim">нагрузка '+itL(it).toFixed(1)+', +'+itU(it).toFixed(1)+'/с</small><br><button data-a="kk" '+K+'">Тип ▸</button> <button data-a="kl" '+K+'_-1">−</button> <button data-a="kl" '+K+'_1">+</button> <button data-a="hue" '+K+'">Цвет</button> <button data-a="openK" '+K+'">Открыть</button> <button data-a="rmK" '+K+'">удалить</button></div>'}).join('');
+  const cont=items+'<div>'+add+'</div>';
+  return '<p class="'+(q.ok?'ok':'bad')+'">'+(q.ok?'Сервер работает. Мощность '+q.p+', занято '+q.load:'Сервер не работает: '+q.why)+'<br>'+(online.has(id)?'Подключён к Интернету.':'Нет связи с Интернетом: соедини сервер на карте.')+'</p><h4>Комплектующие (нажми, чтобы заглянуть внутрь)</h4><div class="grid">'+slots+'</div><h4>Установить комплектующее</h4>'+inst+'<h4>Контент</h4>'+cont}
+ const c=m.srv.slots[sl];if(!c)return null;
+ const I=B.comps[c.t],q=compCheck(c),w=wins[k];
+ if(!w.sel||!I.parts.includes(w.sel)||!avail(B.parts[w.sel]))w.sel=I.parts.find(p=>avail(B.parts[p]));
+ const pal=I.parts.map(p=>{const v=B.parts[p];return '<button class="'+(p==w.sel?'on':'')+'" data-a="pick" data-v="'+k+'|'+p+'"'+(avail(v)?'':' disabled')+'>'+v.n+' ('+(v.p?'+'+v.p+' мощн. ':'')+(v.h?'+'+v.h+' тепла':'')+(v.c?'−'+v.c+' тепла':'')+')'+(avail(v)?'':' (нужно: '+(v.t&&!S.tech[v.t]?B.tech[v.t].n:v.k+' польз.')+')')+'</button>'}).join(' ');
+ const cells=c.cells.map((x,i)=>'<button class="cc" data-a="cell" data-v="'+id+'_'+sl+'_'+i+'">'+(x?B.parts[x].n:'<span class="dim">пусто</span>')+'</button>').join('');
+ return '<p class="'+(q.ok?'ok':'bad')+'">'+I.n+(q.ok?': работает':': не работает, '+q.why)+'<br><small class="dim">мощность '+q.p+', тепло '+q.h+', охлаждение '+q.k+'</small></p><h4>Деталь для установки</h4>'+pal+'<h4>Клетки: пустая — поставить деталь, занятая — убрать</h4><div class="grid" style="grid-template-columns:repeat('+B.COLS+',1fr)">'+cells+'</div>'}
+/* ===== ИССЛЕДОВАНИЯ: дерево технологий, как в жизни ===== */
+function techHTML(){return '<p class="dim">Очки исследований (ОИ) дают работающие серверы в сети: чем больше свободной мощности, тем быстрее. Улучшенные детали и новые типы контента открываются только после изучения технологии.</p>'+Object.entries(B.tech).map(([i,v])=>{const done=S.tech[i],ok=!v.r||S.tech[v.r];
+ return '<div style="margin:8px 0">'+(done?'<span class="ok">Изучено: '+v.n+'</span>':'<b>'+v.n+'</b>')+' <small class="dim">открывает: '+v.d+(v.r?'. Нужно: '+B.tech[v.r].n:'')+'</small>'+(done?'':'<br><button data-a="learn" data-v="'+i+'"'+(ok&&S.rp>=v.c?'':' disabled')+'>Изучить за '+v.c+' ОИ</button>')+'</div>'}).join('')}
+/* ===== КОНТЕНТ: у каждого сайта, программы и игры свой интерфейс ===== */
+const NM={site:['Лента','Атлас','Вокзал','Маяк'],prog:['Кристалл','Проводник','Пульт','Верстак'],game:['Звёздный путь','Лабиринт','Дрейф','Арена']};
+function contentHTML(it){if(!it)return null;const h=it.h||200,nm=it.nm||B.cont[it.t].n,K=itK(it).n,c='hsl('+h+',65%,42%)',bg='hsl('+h+',70%,93%)',st='style="border-color:'+c+'"',tb='<div class="tb" style="background:'+c+'">';
+ const v={site:'<div class="mk" '+st+'>'+tb+'<span>●●●</span><span>https://'+nm.toLowerCase().replace(/ /g,'-')+'.net</span></div><div class="hd" style="background:'+bg+'"><b style="color:'+c+'">'+nm+'</b><small>'+K+'</small></div><div class="ln"><u></u><u></u><u></u></div></div>',
+ prog:'<div class="mk" '+st+'>'+tb+'<span>'+nm+'</span></div><div class="pr"><div class="sd"></div><div class="mn"><b style="color:'+c+'">'+K+'</b><i></i><i></i><i></i></div></div></div>',
+ game:'<div class="mk" '+st+'>'+tb+'<span>'+nm+': '+K+'</span></div><div class="sc">'+[8,24,40,56,72,88].map((x,i)=>'<s style="left:'+x+'%;background:'+c+';animation-delay:'+i*.25+'s"></s>').join('')+'</div></div>'}[it.t];
+ return v+'<p class="dim">Тип «'+K+'», уровень '+it.lv+'. Нагрузка '+itL(it).toFixed(1)+', +'+itU(it).toFixed(1)+' польз./с. Тип, уровень и цвет меняются в окне сервера.</p>'}
+/* ===== МЕНЮ: достижения, магазин за искры, сохранения, тема ===== */
+const ACH=[['a1','Первое подключение','подключи сервер к Интернету',()=>[...online].some(i=>S.mods[i]&&S.mods[i].srv)],['a2','Сеть растёт','100 пользователей',()=>S.users>=100],['a3','Тысяча','1000 пользователей',()=>S.users>=1e3],['a4','Первый сервер','построй сервер',()=>Object.values(S.mods).some(m=>m.srv)],['a5','Открыто для всех','создай контент',()=>Object.values(S.mods).some(m=>m.srv&&m.srv.cont.length)],['a6','Учёный','изучи 3 технологии',()=>Object.keys(S.tech).length>=3],['a7','Модернизация','улучши узел',()=>Object.values(S.mods).some(m=>lvl(m)>1)],['a8','Быстрое хранилище','поставь SSD в сервер',()=>Object.values(S.mods).some(m=>m.srv&&m.srv.slots.some(c=>c&&c.t=='ssd'))]];
+const SHOP=[['Ускорение сети','×2 пользователей на 2 минуты',6,()=>S.boost=Date.now()+12e4],['Грант','+80 очков исследований',4,()=>S.rp+=80],['Инвестиция','+250 кредитов',3,()=>S.cr+=250]];
+function checkAch(){for(const a of ACH)if(!S.ach[a[0]]&&a[3]()){S.ach[a[0]]=1;S.sp+=5;say('Достижение: '+a[1]+' (+5 ✦)')}}
+let devOn=false;
+async function sha(t){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){let x=5381;for(const c of t)x=(x*33^c.charCodeAt(0))>>>0;return'h'+x}}
+function devHTML(){let has=false;try{has=!!localStorage.getItem('ig_pw')}catch(e){}
+ if(!devOn)return '<h4>Режим разработчика</h4><p class="dim">'+(has?'Введи пароль.':'Придумай пароль: он сохранится в этом браузере.')+'</p><input id="dpw" type="password" autocomplete="off"> <button data-a="devpw">'+(has?'Войти':'Задать пароль')+'</button>';
+ return '<h4>Режим разработчика: включён</h4>'+[['cr','+1000 ¤'],['users','+1000 польз.'],['rp','+500 ОИ'],['sp','+50 ✦'],['tech','Изучить всё']].map(x=>'<button data-a="dev" data-v="'+x[0]+'">'+x[1]+'</button>').join(' ')+' <button data-a="devoff">Выйти</button>'}
+function menuHTML(){
+ const ach=ACH.map(a=>'<div style="margin:4px 0">'+(S.ach[a[0]]?'<span class="ok">✔ '+a[1]+'</span>':'<b>'+a[1]+'</b>')+' <small class="dim">'+a[2]+(S.ach[a[0]]?'':' · награда 5 ✦')+'</small></div>').join('');
+ const shop=SHOP.map((x,i)=>'<div style="margin:6px 0"><button data-a="buy" data-v="'+i+'"'+(S.sp>=x[2]?'':' disabled')+'>'+x[0]+': '+x[2]+' ✦</button> <small class="dim">'+x[1]+'</small></div>').join('');
+ const sl=[1,2,3].map(i=>{let d=null;try{d=JSON.parse(localStorage.getItem('ig2s'+i))}catch(e){}return '<div style="margin:6px 0">Слот '+i+': <small class="dim">'+(d?new Date(d.t).toLocaleString('ru-RU'):'пусто')+'</small><br><button data-a="sv" data-v="'+i+'">Сохранить</button> <button data-a="ld" data-v="'+i+'"'+(d?'':' disabled')+'>Загрузить</button></div>'}).join('');
+ return '<h4>Достижения (искры ✦ даются за них)</h4>'+ach+'<h4>Магазин за искры</h4>'+shop+'<h4>Сохранения</h4>'+sl+'<h4>Тема</h4><button data-a="theme" data-v="auto">Авто</button> <button data-a="theme" data-v="dark">Тёмная</button> <button data-a="theme" data-v="light">Светлая</button>'+devHTML()}
+/* ===== ДЕЙСТВИЯ ИГРОКА (кнопки с data-a вызывают A[имя](значение)) ===== */
+const A={
+ close:k=>closeWin(k),
+ openPk:()=>openPicker(),tab:v=>{pk.cat=v;pgrid()},sel:v=>{pk.sel=v;pgrid()},closePk:()=>{pk.el.hidden=true},
+ hue:v=>{const[i,j]=v.split('_'),it=S.mods[i].srv.cont[j];it.h=((it.h||200)+40)%360;changed()},
+ openK:v=>openWin('k'+v),
+ devpw:async()=>{const v=document.getElementById('dpw').value;if(!v)return;const h=await sha(v);let st=null;try{st=localStorage.getItem('ig_pw')}catch(e){}
+  if(!st){try{localStorage.setItem('ig_pw',h)}catch(e){}devOn=true;say('Пароль задан, режим разработчика включён.')}else if(st==h){devOn=true;say('Режим разработчика включён.')}else say('Неверный пароль.');renderWins()},
+ dev:v=>{if(!devOn)return;if(v=='cr')S.cr+=1000;if(v=='users')S.users+=1000;if(v=='rp')S.rp+=500;if(v=='sp')S.sp+=50;if(v=='tech')for(const k in B.tech)S.tech[k]=1;palette();changed()},
+ devoff:()=>{devOn=false;renderWins()},
+ buy:i=>{const x=SHOP[i];if(S.sp<x[2])return;S.sp-=x[2];x[3]();changed()},
+ sv:i=>{try{localStorage.setItem('ig2s'+i,JSON.stringify({t:Date.now(),s:S}))}catch(e){}renderWins()},
+ ld:i=>{try{S=JSON.parse(localStorage.getItem('ig2s'+i)).s}catch(e){return}fix();sel=-1;for(const k of Object.keys(wins))if(k!='m')closeWin(k);palette();changed()},
+ theme:v=>{if(v=='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=v},
+ place:t=>{if(S.cr<(B.mods[t].$||0))return say('Не хватает кредитов: нужно '+B.mods[t].$+' ¤.');S.cr-=B.mods[t].$||0;const m={id:S.next++,born:performance.now(),t,x:-pan.x+(Math.random()-.5)*500,y:-pan.y+120+Math.random()*200,l:[]};
+  if(t=='server')m.srv={slots:Array(B.SLOTS).fill(null),cont:[]};S.mods[m.id]=m;sel=m.id;if(pk.el)pk.el.hidden=true;changed()},
+ openC:v=>openWin('c'+v),
+ rmC:v=>{const[i,s]=v.split('_');S.mods[i].srv.slots[s]=null;changed()},
+ addC:v=>{const[i,t]=v.split('_'),sl=S.mods[i].srv.slots,cost=B.comps[t].$;if(S.cr<cost)return;S.cr-=cost;sl[sl.indexOf(null)]={t,cells:Array(B.CELLS).fill('')};changed()},
+ addK:v=>{const[i,t]=v.split('_');S.mods[i].srv.cont.push({t,k:0,lv:1,h:Math.random()*360|0,nm:NM[t][Math.random()*NM[t].length|0]});changed()},
+ rmK:v=>{const[i,j]=v.split('_');S.mods[i].srv.cont.splice(j,1);changed()},
+ kk:v=>{const[i,j]=v.split('_'),it=S.mods[i].srv.cont[j],ks=B.cont[it.t].kinds;let n=it.k;do n=(n+1)%ks.length;while(ks[n].t&&!S.tech[ks[n].t]);it.k=n;changed()},
+ kl:v=>{const[i,j,d]=v.split('_'),it=S.mods[i].srv.cont[j];it.lv=Math.min(3,Math.max(1,it.lv+ +d));changed()},
+ learn:i=>{const v=B.tech[i];if(S.rp>=v.c&&(!v.r||S.tech[v.r])){S.rp-=v.c;S.tech[i]=1;palette();changed()}},
+ pick:v=>{const[k,p]=v.split('|');wins[k].sel=p;changed()},
+ cell:v=>{const[i,s,n]=v.split('_').map(Number),c=S.mods[i].srv.slots[s];c.cells[n]=c.cells[n]?'':wins['c'+i+'_'+s].sel;changed()}};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b&&!b.disabled&&A[b.dataset.a])A[b.dataset.a](b.dataset.v)});
+/* ===== ИНТЕРФЕЙС ===== */
+const HINT='Старт: 100 ¤. Купи сервер и кабель, поставь в сервер процессор, память, охлаждение и диск, затем соедини сервер с Интернетом. Интернет сам ничего не приносит: пользователей даёт контент на сервере.';
+function setT(id,v){const e=$(id);if(e.textContent!==v){e.textContent=v;e.classList.remove('bump');void e.offsetWidth;e.classList.add('bump')}}
+let mt;function say(t){const mm=$('#msg');mm.textContent=t;mm.classList.remove('flash');void mm.offsetWidth;mm.classList.add('flash');clearTimeout(mt);mt=setTimeout(()=>$('#msg').textContent=HINT,5000)}
+let lastSig=-1;
+/* ----- окно «Добавить узел»: категории, поиск, описание ----- */
+const CAT={net:['Сеть',['cable','router','hub','switch','sat']],srv:['Серверы',['server','cdn']],buf:['Усилители',['scanner','verifier','enhancer']],res:['Ресурсы',['auto','cpucell','research','miner']]};
+const DESC={hub:'Одно подключение на многие: до 8 связей, но скорость делится между ними.',cable:'Дешёвый мост: тянет связь на большое расстояние, пользователей не приносит.',router:'Раздаёт интернет по области (круг на карте): узлы внутри подключаются без кабеля, скорость делится между ними.',switch:'Соединяет далёкие узлы и понемногу приводит пользователей.',sat:'Связь через орбиту: огромная дальность и много пользователей.',server:'Здесь собирают комплектующие и размещают сайты, программы и игры.',cdn:'Ускоряет доставку контента: серверы рядом получают бонус к приросту.',scanner:'Следит за безопасностью: бонус к приросту подключённых серверов.',verifier:'Проверяет сборки контента: бонус к приросту подключённых серверов.',enhancer:'Доводит контент до блеска: сильный бонус серверам рядом.',auto:'Сам привлекает пользователей, пока ты занят другим.',cpucell:'Небольшой вклад в очки исследований.',research:'Лаборатория: стабильно приносит очки исследований.',miner:'Крутит видеокарты ради дополнительных пользователей.'};
+const pk={q:'',cat:'all',sel:'router',el:null};
+function openPicker(){
+ if(!pk.el){const e=document.createElement('div');e.className='pk';
+  e.innerHTML='<div class="pt"><b>Добавить узел</b><button data-a="closePk" aria-label="Закрыть">×</button></div><div class="pbd"><div class="pl"><input id="pq" placeholder="Поиск" autocomplete="off"><div id="ptabs"></div><div id="pg"></div></div><div id="pd"></div></div>';
+  document.body.appendChild(e);pk.el=e;$('#pq').oninput=ev=>{pk.q=ev.target.value.toLowerCase();pgrid()}}
+ pk.el.hidden=false;pgrid()}
+function pgrid(){
+ const all=Object.keys(B.mods).filter(k=>k!='internet'),list=(pk.cat=='all'?all:CAT[pk.cat][1]).filter(k=>B.mods[k].n.toLowerCase().includes(pk.q));
+ $('#ptabs').innerHTML=[['all','Все']].concat(Object.entries(CAT).map(([k,v])=>[k,v[0]])).map(([k,n])=>'<button class="'+(pk.cat==k?'on':'')+'" data-a="tab" data-v="'+k+'">'+n+'</button>').join('');
+ $('#pg').innerHTML=list.map(k=>'<button class="nb'+(k==pk.sel?' on':'')+'" data-a="sel" data-v="'+k+'"'+(!avail(B.mods[k])?' style="opacity:.5"':'')+'><i>'+(GL[k]||'◆')+'</i><span>'+B.mods[k].n+'</span></button>').join('')||'<p class="dim">Ничего не найдено</p>';
+ const m=B.mods[pk.sel],lk=m&&!avail(m);
+ $('#pd').innerHTML=m?'<h3><i>'+(GL[pk.sel]||'◆')+'</i> '+m.n+'</h3><p class="dim">'+(DESC[pk.sel]||'')+'</p><p>Портов: '+(m.lim||2)+'<br>Дальность связи: '+m.r+(m.cov?'<br>Зона раздачи: '+m.cov:'')+(m.u?'<br>Пользователи: +'+m.u+'/с':'')+(m.b?'<br>Бонус серверам: +'+m.b*100+'%':'')+(m.rp?'<br>Очки исследований: +'+m.rp+'/с':'')+'</p><button data-a="place" data-v="'+pk.sel+'"'+(lk?' disabled':'')+'>'+(lk?(m.t&&!S.tech[m.t]?'Нужно: '+B.tech[m.t].n:'Откроется при '+m.k+' польз.'):'Построить за '+(m.$||0)+' ¤')+'</button>':''}
+addEventListener('keydown',e=>{if(e.key=='Escape'&&pk.el)pk.el.hidden=true});
+function palette(){lastSig=sig();$('#pal').innerHTML='<button class="mb" data-a="openPk"><i>＋</i>Добавить узел</button>';if(pk.el&&!pk.el.hidden)pgrid()}
+function ui(){const m=S.mods[sel];$('#sel').hidden=!m;if(!m){sel=-1;linking=false;return}
+ $('#selinfo').textContent=B.mods[m.t].n+' #'+sel+': '+(online.has(sel)?'в сети':'нет связи')+'. Связей '+m.l.length+', дальность '+~~mr(m)+(linking?'. Нажми на модуль, с которым соединить.':'');
+ $('#bLink').textContent=linking?'Выбери модуль…':'Соединить с…';$('#bOpen').hidden=!m.srv;const uc=upCost(m);$('#bUp').textContent=lvl(m)>=5?'Макс. уровень':'Улучшить ('+uc+' ¤)';$('#bUp').disabled=lvl(m)>=5||S.cr<uc;$('#bDel').disabled=!sel}
+function changed(){recalc();renderWins();ui();save()}
+$('#bLink').onclick=()=>{linking=!linking;ui()};
+$('#bOpen').onclick=()=>openWin('s'+sel);
+$('#bDel').onclick=()=>{const m=S.mods[sel];for(const o of m.l){const q=S.mods[o];q.l=q.l.filter(x=>x!=sel)}delete S.mods[sel];sel=-1;linking=false;changed()};
+$('#bTech').onclick=()=>openWin('t');$('#bMenu').onclick=()=>openWin('m');
+$('#bUp').onclick=()=>{const m=S.mods[sel],c=upCost(m);if(m&&lvl(m)<5&&S.cr>=c){S.cr-=c;m.lv=lvl(m)+1;const p=ctr(m);fl.push({x:p.x,y:p.y-30,t:performance.now(),s:'▲ ур.'+m.lv});changed()}};
+$('#bHome').onclick=()=>{panT={x:-S.mods[0].x,y:-S.mods[0].y};Zt=1};
+function zoomBy(f){Zt=Math.min(2,Math.max(.2,Zt*f))}
+$('#bZi').onclick=()=>zoomBy(1.25);$('#bZo').onclick=()=>zoomBy(.8);
+cv.addEventListener('wheel',e=>{e.preventDefault();zoomBy(e.deltaY<0?1.12:1/1.12)},{passive:false});
+let rs=0;$('#bReset').onclick=e=>{const b=e.target;
+ if(!rs){rs=1;b.classList.add('on');say('Нажми «Сброс» ещё раз, чтобы стереть прогресс.');setTimeout(()=>{rs=0;b.classList.remove('on')},3000)}
+ else{S=fresh();sel=-1;for(const k of Object.keys(wins))closeWin(k);rs=0;b.classList.remove('on');palette();changed()}};
+/* ===== ЗАПУСК ===== */
+let last=performance.now(),acc=0;
+function tick(t){const dt=Math.min((t-last)/1000,1);last=t;Z+=(Zt-Z)*Math.min(1,dt*10);if(panT){const k=Math.min(1,dt*8);pan.x+=(panT.x-pan.x)*k;pan.y+=(panT.y-pan.y)*k;if(Math.hypot(panT.x-pan.x,panT.y-pan.y)<.5)panT=null}S.users+=rate*dt;S.rp+=rpRate*dt;S.cr+=crRate*dt;acc+=dt;
+ if(acc>.5){acc=0;recalc();checkAch();renderWins();if(sig()!=lastSig)palette();ui()}
+ setT('#users',f(S.users));$('#urate').textContent='+'+rate.toFixed(1)+'/с';
+ setT('#cr',f(S.cr));$('#crr').textContent='+'+crRate.toFixed(1)+'/с';setT('#sp',''+S.sp);setT('#rp',f(S.rp));$('#rrate').textContent='+'+rpRate.toFixed(2)+'/с';
+ draw()}
+function loop(t){try{tick(t)}catch(e){console.error(e)}requestAnimationFrame(loop)}
+$('#msg').textContent=HINT;palette();recalc();ui();resize();
+setInterval(save,5000);addEventListener('pagehide',save);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
